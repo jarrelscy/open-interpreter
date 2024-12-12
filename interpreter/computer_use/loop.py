@@ -20,6 +20,7 @@ except ImportError:  # 3.10 compatibility
 from typing import Any, List, cast
 
 import requests
+from anthropic import RateLimitError
 from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex, APIResponse
 from anthropic.types import ToolResultBlockParam
 from anthropic.types.beta import (
@@ -149,15 +150,21 @@ async def sampling_loop(
         # we use raw_response to provide debug information to streamlit. Your
         # implementation may be able call the SDK directly with:
         # `response = client.messages.create(...)` instead.
-        raw_response = client.beta.messages.create(
-            max_tokens=max_tokens,
-            messages=messages,
-            model=model,
-            system=system,
-            tools=tool_collection.to_params(),
-            betas=["computer-use-2024-10-22"],
-            stream=True,
-        )
+        completed = False
+        while not completed:
+            try:
+                raw_response = client.beta.messages.create(
+                    max_tokens=max_tokens,
+                    messages=messages,
+                    model=model,
+                    system=system,
+                    tools=tool_collection.to_params(),
+                    betas=["computer-use-2024-10-22"],
+                    stream=True,
+                )
+            except RateLimitError as e:
+                print (str(e))
+                asyncio.sleep(4)
 
         response_content = []
         current_block = None
