@@ -155,19 +155,18 @@ async def sampling_loop(
             try:
                 print (f'Message length: {len(messages)}')
                 raw_response = client.beta.messages.create(
-                    max_tokens=max_tokens,
-                    messages=messages,
-                    model=model,
-                    system=system,
-                    tools=tool_collection.to_params(),
-                    betas=["computer-use-2024-10-22"],
-                    stream=True,
+                     max_tokens=max_tokens,
+                     messages=messages,
+                     model=model,
+                     system=system,
+                     tools=tool_collection.to_params(),
+                     betas=["computer-use-2024-10-22"],
+                     stream=True,
                 )
                 completed = True
             except RateLimitError as e:
                 print (str(e))
                 asyncio.sleep(4)
-
         response_content = []
         current_block = None
 
