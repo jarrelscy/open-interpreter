@@ -167,6 +167,8 @@ async def sampling_loop(
             except RateLimitError as e:
                 print (str(e))
                 asyncio.sleep(4)
+
+        
         response_content = []
         current_block = None
 
