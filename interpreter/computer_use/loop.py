@@ -403,7 +403,7 @@ async def main():
                     yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
 
                     messages = [m for m in messages if m["content"]]
-                    print (f'Start sampling loop with {len(message}} messages')
+                    print (f'Start sampling loop with {len(messages)} messages')
                     await asyncio.sleep(4)
                     
                     async for chunk in sampling_loop(
