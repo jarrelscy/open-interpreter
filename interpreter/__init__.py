@@ -1,4 +1,5 @@
 import sys
+import logging
 
 if "--os" in sys.argv:
     from rich import print as rich_print
@@ -43,12 +44,12 @@ if "--os" in sys.argv:
         return version.parse(latest_version) > version.parse(current_version)
 
     if check_for_update():
-        print_markdown(
+        logging.info(
             "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
         )
 
     if "--voice" in sys.argv:
-        print("Coming soon...")
+        logging.info("Coming soon...")
     from .computer_use.loop import run_async_main
 
     run_async_main()
