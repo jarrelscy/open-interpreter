@@ -35,6 +35,8 @@ Action = Literal[
     "double_click",
     "screenshot",
     "cursor_position",
+    "scroll_down",
+    "scroll_up"
 ]
 
 
@@ -204,9 +206,16 @@ class ComputerTool(BaseAnthropicTool):
                 pyautogui.click()
             else:
                 pyautogui.click(button=button.get(action, "left"))
-
+        
         elif action == "screenshot":
             return await self.screenshot()
+
+            
+        elif action == "scroll_down":
+            pyautogui.scroll(-6)
+
+        elif action == "scroll_up":
+            pyautogui.scroll(6)
 
         elif action == "cursor_position":
             x, y = pyautogui.position()
