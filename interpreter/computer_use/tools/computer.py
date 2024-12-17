@@ -35,8 +35,6 @@ Action = Literal[
     "double_click",
     "screenshot",
     "cursor_position",
-    "scroll_down",
-    "scroll_up"
 ]
 
 
@@ -188,6 +186,10 @@ class ComputerTool(BaseAnthropicTool):
                         os.system("osascript -e '{}'".format(script))
                     else:
                         pyautogui.hotkey(*keys)
+                elif keys[0] == 'pgdn':
+                    pyautogui.scroll(-6)
+                elif keys[0] == 'pgup':
+                    pyautogui.scroll(6)
                 else:
                     pyautogui.press(keys[0])
             elif action == "type":
@@ -211,11 +213,6 @@ class ComputerTool(BaseAnthropicTool):
             return await self.screenshot()
 
             
-        elif action == "scroll_down":
-            pyautogui.scroll(-6)
-
-        elif action == "scroll_up":
-            pyautogui.scroll(6)
 
         elif action == "cursor_position":
             x, y = pyautogui.position()
