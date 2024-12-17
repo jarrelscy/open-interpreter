@@ -187,9 +187,9 @@ class ComputerTool(BaseAnthropicTool):
                     else:
                         pyautogui.hotkey(*keys)
                 elif keys[0] == 'pgdn':
-                    pyautogui.scroll(-2)
+                    pyautogui.scroll(-1)
                 elif keys[0] == 'pgup':
-                    pyautogui.scroll(2)
+                    pyautogui.scroll(1)
                 else:
                     pyautogui.press(keys[0])
             elif action == "type":
