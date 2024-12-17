@@ -156,7 +156,7 @@ async def sampling_loop(
                 print (f'Message length: {len(messages)}')
                 raw_response = client.beta.messages.create(
                      max_tokens=max_tokens,
-                     messages=messages,
+                     messages=messages[:60],
                      model=model,
                      system=system,
                      tools=tool_collection.to_params(),
@@ -201,7 +201,7 @@ async def sampling_loop(
                             response_content.append(current_block)
                             current_block = None
                 completed = True
-            except (RateLimitError, APIStatusError) as e:
+            except Exception as e:
                 print (str(e))
                 print ("Trying again...")
                 print("Before await asyncio.sleep(4)")
