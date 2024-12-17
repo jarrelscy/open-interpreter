@@ -167,6 +167,7 @@ async def sampling_loop(
                 response_content = []
                 current_block = None
         
+                print (f'Starting streaming response')
                 for chunk in raw_response:
                     if isinstance(chunk, BetaRawContentBlockStartEvent):
                         current_block = chunk.content_block
@@ -174,7 +175,7 @@ async def sampling_loop(
                         if chunk.delta.type == "text_delta":
                             print(f"{chunk.delta.text}", end="", flush=True)
                             yield {"type": "chunk", "chunk": chunk.delta.text}
-                            print("Before await asyncio.sleep(0)")
+                            print("Before BetaRawContentBlockDeltaEvent await asyncio.sleep(0)")
                             await asyncio.sleep(0)
                             if current_block and current_block.type == "text":
                                 current_block.text += chunk.delta.text
@@ -196,11 +197,12 @@ async def sampling_loop(
                                 # Finished a message
                                 print("\n")
                                 yield {"type": "chunk", "chunk": "\n"}
-                                print("Before await asyncio.sleep(0)")
+                                print("Before BetaRawContentBlockStopEvent await asyncio.sleep(0)")
                                 await asyncio.sleep(0)
                             response_content.append(current_block)
                             current_block = None
                 completed = True
+                print ("Completed API streaming response")
             except Exception as e:
                 print (str(e))
                 print ("Trying again...")
@@ -227,7 +229,7 @@ async def sampling_loop(
                 "content": cast(list[BetaContentBlockParam], response.content),
             }
         )
-
+        print ("Starting tool_collection run")
         tool_result_content: list[BetaToolResultBlockParam] = []
         for content_block in cast(list[BetaContentBlock], response.content):
             output_callback(content_block)
