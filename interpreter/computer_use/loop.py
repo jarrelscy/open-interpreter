@@ -55,7 +55,7 @@ from rich.rule import Rule
 messages: List[BetaMessageParam] = []
 
 # Set the logging level to INFO
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename='/home/vboxuser/interpreter.log', filemode='a', level=logging.INFO)
 
 def print_markdown(message):
     """
