@@ -174,6 +174,7 @@ async def sampling_loop(
                         if chunk.delta.type == "text_delta":
                             print(f"{chunk.delta.text}", end="", flush=True)
                             yield {"type": "chunk", "chunk": chunk.delta.text}
+                            print("Before await asyncio.sleep(0)")
                             await asyncio.sleep(0)
                             if current_block and current_block.type == "text":
                                 current_block.text += chunk.delta.text
@@ -195,6 +196,7 @@ async def sampling_loop(
                                 # Finished a message
                                 print("\n")
                                 yield {"type": "chunk", "chunk": "\n"}
+                                print("Before await asyncio.sleep(0)")
                                 await asyncio.sleep(0)
                             response_content.append(current_block)
                             current_block = None
@@ -202,7 +204,8 @@ async def sampling_loop(
             except (RateLimitError, APIStatusError) as e:
                 print (str(e))
                 print ("Trying again...")
-                asyncio.sleep(4)
+                print("Before await asyncio.sleep(4)")
+                await asyncio.sleep(4)
 
         response = BetaMessage(
             id=str(uuid.uuid4()),
@@ -229,6 +232,7 @@ async def sampling_loop(
         for content_block in cast(list[BetaContentBlock], response.content):
             output_callback(content_block)
             if content_block.type == "tool_use":
+                print("Before await tool_collection.run")
                 result = await tool_collection.run(
                     name=content_block.name,
                     tool_input=cast(dict[str, Any], content_block.input),
