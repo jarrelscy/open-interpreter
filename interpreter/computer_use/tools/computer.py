@@ -7,6 +7,7 @@ import shlex
 import shutil
 import tempfile
 import time
+import logging
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal, TypedDict
@@ -133,7 +134,7 @@ class ComputerTool(BaseAnthropicTool):
         coordinate: tuple[int, int] | None = None,
         **kwargs,
     ):
-        print (f"Computer use: {action}, {text}")
+        logging.info(f"Computer use: {action}, {text}")
         if action in ("mouse_move", "left_click_drag"):
             if coordinate is None:
                 raise ToolError(f"coordinate is required for {action}")

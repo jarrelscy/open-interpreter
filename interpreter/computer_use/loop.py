@@ -11,6 +11,7 @@ import traceback
 import uuid
 from collections.abc import Callable
 from datetime import datetime
+import logging
 
 try:
     from enum import StrEnum
@@ -53,6 +54,8 @@ from rich.rule import Rule
 # Add this near the top of the file, with other imports and global variables
 messages: List[BetaMessageParam] = []
 
+# Set the logging level to INFO
+logging.basicConfig(level=logging.INFO)
 
 def print_markdown(message):
     """
@@ -153,7 +156,7 @@ async def sampling_loop(
         completed = False
         while not completed:
             try:
-                print (f'Message length: {len(messages)}')
+                logging.info(f'Message length: {len(messages)}')
                 raw_response = client.beta.messages.create(
                      max_tokens=max_tokens,
                      messages=messages[-60:],
@@ -172,14 +175,14 @@ async def sampling_loop(
                         current_block = chunk.content_block
                     elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
                         if chunk.delta.type == "text_delta":
-                            print(f"{chunk.delta.text}", end="", flush=True)
+                            logging.info(f"{chunk.delta.text}", end="", flush=True)
                             yield {"type": "chunk", "chunk": chunk.delta.text}
-                            print("Before await asyncio.sleep(0)")
+                            logging.info("Before await asyncio.sleep(0)")
                             await asyncio.sleep(0)
                             if current_block and current_block.type == "text":
                                 current_block.text += chunk.delta.text
                         elif chunk.delta.type == "input_json_delta":
-                            print(f"{chunk.delta.partial_json}", end="", flush=True)
+                            logging.info(f"{chunk.delta.partial_json}", end="", flush=True)
                             if current_block and current_block.type == "tool_use":
                                 if not hasattr(current_block, "partial_json"):
                                     current_block.partial_json = ""
@@ -188,23 +191,23 @@ async def sampling_loop(
                         if current_block:
                             if hasattr(current_block, "partial_json"):
                                 # Finished a tool call
-                                # print()
+                                # logging.info()
                                 current_block.input = json.loads(current_block.partial_json)
                                 # yield {"type": "chunk", "chunk": current_block.input}
                                 delattr(current_block, "partial_json")
                             else:
                                 # Finished a message
-                                print("\n")
+                                logging.info("\n")
                                 yield {"type": "chunk", "chunk": "\n"}
-                                print("Before await asyncio.sleep(0)")
+                                logging.info("Before await asyncio.sleep(0)")
                                 await asyncio.sleep(0)
                             response_content.append(current_block)
                             current_block = None
                 completed = True
             except Exception as e:
-                print (str(e))
-                print ("Trying again...")
-                print("Before await asyncio.sleep(4)")
+                logging.info(str(e))
+                logging.info("Trying again...")
+                logging.info("Before await asyncio.sleep(4)")
                 await asyncio.sleep(4)
 
         response = BetaMessage(
@@ -232,7 +235,7 @@ async def sampling_loop(
         for content_block in cast(list[BetaContentBlock], response.content):
             output_callback(content_block)
             if content_block.type == "tool_use":
-                print("Before await tool_collection.run")
+                logging.info("Before await tool_collection.run")
                 result = await tool_collection.run(
                     name=content_block.name,
                     tool_input=cast(dict[str, Any], content_block.input),
@@ -366,13 +369,13 @@ async def main():
 
         @app.post("/openai/chat/completions")
         async def chat_completion(request: ChatCompletionRequest):
-            print("BRAND NEW REQUEST")
+            logging.info("BRAND NEW REQUEST")
             # Check exit flag before processing request
             if exit_flag:
                 return {"error": "Server shutting down due to mouse in corner"}
 
             async def stream_response():
-                print("is this even happening")
+                logging.info("is this even happening")
 
                 # Instead of creating converted_messages, append the last message to global messages
                 global messages
@@ -403,7 +406,7 @@ async def main():
                     yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
 
                     messages = [m for m in messages if m["content"]]
-                    print (f'Start sampling loop with {len(message}} messages')
+                    logging.info(f'Start sampling loop with {len(message}} messages')
                     await asyncio.sleep(4)
                     
                     async for chunk in sampling_loop(
@@ -424,11 +427,11 @@ async def main():
                     yield f"data: {json.dumps({'choices': [{'delta': {'content': '', 'finish_reason': 'stop'}}]})}\n\n"
 
                 except Exception as e:
-                    print("Error: An exception occurred.")
-                    print(traceback.format_exc())
+                    logging.info("Error: An exception occurred.")
+                    logging.info(traceback.format_exc())
                     pass
                     # raise
-                    # print(f"Error: {e}")
+                    # logging.info(f"Error: {e}")
                     # yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
             return StreamingResponse(stream_response(), media_type="text/event-stream")
@@ -437,10 +440,10 @@ async def main():
         return app
 
     # Original CLI code continues here...
-    print()
+    logging.info("")
     print_markdown("Welcome to **Open Interpreter**.\n")
     print_markdown("---")
-    time.sleep(0.5)
+    await asyncio.sleep(0.5)
 
     # Check for API key in environment variable
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -449,7 +452,7 @@ async def main():
             "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
         )
         print_markdown("\n---")
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
 
     import random
 
@@ -481,7 +484,7 @@ Move your mouse to any corner of the screen to exit.
 
     while not exit_flag:
         user_input = input("> ")
-        print()
+        logging.info("")
         if user_input.lower() in ["exit", "quit", "q"]:
             break
         elif user_input.lower() in ["d"]:
@@ -511,9 +514,9 @@ Move your mouse to any corner of the screen to exit.
 
         def tool_output_callback(result: ToolResult, tool_id: str):
             if result.output:
-                print(f"---\n{result.output}\n---")
+                logging.info(f"---\n{result.output}\n---")
             if result.error:
-                print(f"---\n{result.error}\n---")
+                logging.info(f"---\n{result.error}\n---")
 
         try:
             async for chunk in sampling_loop(
@@ -572,7 +575,7 @@ def check_mouse_position():
             )
         ):
             exit_flag = True
-            print("\nMouse moved to corner. Exiting...")
+            logging.info("\nMouse moved to corner. Exiting...")
             os._exit(0)
         threading.Event().wait(0.1)  # Check every 100ms
 

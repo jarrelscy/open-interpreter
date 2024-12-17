@@ -1,5 +1,6 @@
 import asyncio
 import os
+import logging
 from typing import ClassVar, Literal
 
 from anthropic.types.beta import BetaToolBash20241022Param
@@ -49,7 +50,7 @@ class _BashSession:
     async def run(self, command: str):
         """Execute a command in the bash shell."""
         # Ask for user permission before executing the command
-        print(f"Do you want to execute the following command?\n{command}")
+        logging.info(f"Do you want to execute the following command?\n{command}")
         user_input = input("Enter 'yes' to proceed, anything else to cancel: ")
 
         if user_input.lower() != "yes":
