@@ -169,6 +169,7 @@ async def sampling_loop(
         
                 print (f'Starting streaming response')
                 for chunk in raw_response:
+                    print ('Got chunk!')
                     if isinstance(chunk, BetaRawContentBlockStartEvent):
                         current_block = chunk.content_block
                     elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
@@ -203,6 +204,7 @@ async def sampling_loop(
                                 print("After BetaRawContentBlockStopEvent await asyncio.sleep(0)")
                             response_content.append(current_block)
                             current_block = None
+                    print ('Waiting for chunk!')
                 completed = True
                 print ("Completed API streaming response")
             except Exception as e:
