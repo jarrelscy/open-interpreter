@@ -567,7 +567,10 @@ def check_mouse_position():
     screen_width, screen_height = pyautogui.size()
 
     while not exit_flag:
-        x, y = pyautogui.position()
+        try:
+            x, y = pyautogui.position()
+        except Exception as e:
+            print (f'Warning, could not read mouse position due to {e}')
         if (
             (x <= corner_threshold and y <= corner_threshold)
             or (x <= corner_threshold and y >= screen_height - corner_threshold)
