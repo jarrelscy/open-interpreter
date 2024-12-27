@@ -143,9 +143,12 @@ class ComputerTool(BaseAnthropicTool):
 
             if action == "mouse_move":
                 smooth_move_to(x, y)
-            elif action == "left_click_drag":
+            elif action == "left_click_drag":                
+                x2, y2 = self.scale_coordinates(
+                    ScalingSource.API, coordinate[2], coordinate[3]
+                )
                 smooth_move_to(x, y)
-                pyautogui.dragTo(x, y, button="left")
+                pyautogui.dragTo(x2, y2, button="left")
 
         elif action in ("key", "type"):
             if text is None:
