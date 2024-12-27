@@ -177,9 +177,7 @@ async def sampling_loop(
                         if chunk.delta.type == "text_delta":
                             print(f"{chunk.delta.text}", end="", flush=True)
                             yield {"type": "chunk", "chunk": chunk.delta.text}
-                            print("Before BetaRawContentBlockDeltaEvent await asyncio.sleep(0)")
                             await asyncio.sleep(0)
-                            print("After BetaRawContentBlockDeltaEvent await asyncio.sleep(0)")
                             if current_block and current_block.type == "text":
                                 current_block.text += chunk.delta.text
                         elif chunk.delta.type == "input_json_delta":
@@ -200,9 +198,7 @@ async def sampling_loop(
                                 # Finished a message
                                 print("\n")
                                 yield {"type": "chunk", "chunk": "\n"}
-                                print("Before BetaRawContentBlockStopEvent await asyncio.sleep(0)")
                                 await asyncio.sleep(0)
-                                print("After BetaRawContentBlockStopEvent await asyncio.sleep(0)")
                             response_content.append(current_block)
                             current_block = None
                     with open('/home/vboxuser/chunk.log', 'a') as f:
